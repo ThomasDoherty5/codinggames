@@ -17,6 +17,8 @@ jHeight = 400
 bounce = -0.6
 scoreRate = 5
 speedUpRate = 0.04
+downJump = 80
+jumpTime = 2*framerate
 
 highscore = 0
 
@@ -29,6 +31,7 @@ pen = Turtle()
 pen.hideturtle()
 pen.penup()
 
+# Window
 wn = Screen()
 wn.bgcolor('#2288CC')
 wn.title("Runner Game")
@@ -37,6 +40,7 @@ wn.tracer(0)
 wn.listen()
 wn.onkeypress(bye, 'Escape')
 
+# For purposes of changing the speed later
 sp = speed
 
 colors = [
@@ -46,6 +50,7 @@ colors = [
 '#FF00C0', '#FF0080', '#FF0040'
 ]
 
+# For everything on-screen
 class Obj():
 
 	# x and y are STARTING coords
@@ -74,7 +79,7 @@ class Obj():
 					self.t.sety(obj.t.ycor()+20)
 					speedDict[self][1] = 0
 					return None
-		pl.t.sety(pl.t.ycor() - 30)
+		self.t.sety(pl.t.ycor() - downJump)
 
 	# If two entities have collided
 	def collided(self, other):
@@ -110,9 +115,8 @@ coin = Obj('#FFCC22', 500, randint(-3, 3)*100, 1, False, None); coin.t.shape('ci
 bar = Obj('#FFFFFF', 0, 195, 50, False, None)
 bar.t.shapesize(stretch_wid = 0.5, stretch_len = 50)
 
+# Player
 pl = Obj('#00FF00', 0, 20, 1, True, 'pl')
-
-jumpTime = 2*framerate
 
 def jump():
 	global jumpTime
@@ -123,15 +127,15 @@ def jump():
 		pass;
 
 def jump_down():
-
 	pl.down()
 
+# Main game (not counting death)
 def main():
 
 	global sp
-	sp = speed
 	global jumpTime
 	global highscore
+	sp = speed
 
 	score = 0
 	elapsed = 0
@@ -149,7 +153,9 @@ def main():
 		sleep(0.1)
 		pen.clear()
 
+	# Real 'main loop' in main()
 	while True:
+		# Refresh the screen
 		wn.update()
 
 		pen.clear()
@@ -177,7 +183,7 @@ def main():
 			obj.upd()
 			if obj.t.xcor() < -440:
 				if obj == pl:
-					return None
+					return score
 				else:
 					obj.change_layer(randint(-3, 3))
 					if obj == coin:
@@ -204,7 +210,7 @@ def main():
 					# If it's colliding from the horizontal
 					if pl.angle(obj) < atan(1/4) and pl.angle(obj) > atan(-1/4):
 						if obj.t.xcor() > pl.t.xcor():
-							return None;
+							return score;
 					else:
 						speedDict[pl][1] *= bounce
 						if obj.t.ycor() < pl.t.ycor():
@@ -214,7 +220,7 @@ def main():
 
 		# This brings up the 'death' animation
 		if pl.t.ycor() < -260:
-			return None;
+			return score;
 
 		# Score checking
 		if score > highscore:
@@ -229,17 +235,17 @@ def main():
 			score += 1
 		sleep(1/framerate)
 
-def death():
+def death(sc):
 	for obj in speedDict:
 		obj.t.goto(1000, 0)
 
 	wn.update()
 
 	pen.goto(0, 0)
-	pen.write('You died', align = 'center', font = ('Times', 30, 'bold'))
+	pen.write('You died!    Score: ' + str(sc), align = 'center', font = ('Times', 30, 'bold'))
 	sleep(2)
 	pen.clear()
 
 while True:
-	main()
-	death()
+	sc = main()
+	death(sc)
