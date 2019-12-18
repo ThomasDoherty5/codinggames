@@ -16,7 +16,9 @@ framerate = 60
 jHeight = 400
 bounce = -0.6
 scoreRate = 5
-speedUpRate = 0.1
+speedUpRate = 0.04
+
+highscore = 0
 
 # For storing the speeds of objects
 # Will store as vectors
@@ -37,6 +39,13 @@ wn.onkeypress(bye, 'Escape')
 
 sp = speed
 
+colors = [
+'#FF0000', '#FF4000', '#FF8000', '#FFC000', '#FFFF00',
+'#C0FF00', '#80FF00', '#40FF00', '#00FF00', '#00FF40', '#00FF80', '#00FFC0', '#00FFFF',
+'#00C0FF', '#0040FF', '#0000FF', '#4000FF', '#8000FF', '#C000FF', '#FF00FF',
+'#FF00C0', '#FF0080', '#FF0040'
+]
+
 class Obj():
 
 	# x and y are STARTING coords
@@ -45,7 +54,8 @@ class Obj():
 		self.t.penup()
 		self.t.color(color)
 		self.t.goto(x, y)
-		self.t.shape('square'); self.t.shapesize(stretch_len = length);
+		self.t.shape('square')
+		self.t.shapesize(stretch_len = length);
 		self.length = length
 		self.x = x; self.y = y
 		self.gr = grav; self.ty = t;
@@ -59,8 +69,8 @@ class Obj():
 
 	def down(self):
 		for obj in speedDict:
-			if obj.t.xcor() in range(int((self.t.xcor() - 50)//1), int((self.t.xcor()+51)/1)):
-				if obj.t.ycor() in range(-440, int(self.t.ycor()//1)):
+			if int(obj.t.xcor()//1) in range(int((self.t.xcor() - 50)//1), int((self.t.xcor()+51)/1)):
+				if int(obj.t.ycor()//1) in range(-440, int(self.t.ycor()//1)):
 					self.t.sety(obj.t.ycor()+20)
 					speedDict[self][1] = 0
 					return None
@@ -94,6 +104,7 @@ obsThree = Obj('#FFFF00', -430, -50, 4, False, 'obs')
 obsFour = Obj('#00A000', 50, 0, 5, False, 'obs')
 obsFive = Obj('#0000FF', -110, -100, 4, False, 'obs')
 obsSix = Obj('#800080', 210, 150, 5, False, 'obs')
+coin = Obj('#FFCC22', 500, randint(-3, 3)*100, 1, False, None); coin.t.shape('circle')
 
 # Top bar
 bar = Obj('#FFFFFF', 0, 195, 50, False, None)
@@ -112,6 +123,7 @@ def jump():
 		pass;
 
 def jump_down():
+
 	pl.down()
 
 def main():
@@ -119,9 +131,12 @@ def main():
 	global sp
 	sp = speed
 	global jumpTime
+	global highscore
 
 	score = 0
 	elapsed = 0
+
+	speedDict[pl] = [0, 0]
 
 	# Starting off the game
 	for obj in speedDict:
@@ -138,7 +153,7 @@ def main():
 		wn.update()
 
 		pen.clear()
-		pen.write(score, align = 'center', font = ('Times', 20, 'normal'))
+		pen.write("Score: " + str(score) + "     High Score: " + str(highscore), align = 'center', font = ('Times', 20, 'normal'))
 
 		for obj in speedDict:
 			# Moving everything
@@ -150,7 +165,7 @@ def main():
 			for obj2 in speedDict:
 				if obj != obj2 and obj != pl and obj2 != pl:
 					if obj.collided(obj2):
-						obj.t.sety(obj.t.ycor() + choice(-20, 20))
+						obj.t.sety(obj.t.ycor() + choice([-20, 20]))
 
 		#Jumping
 		wn.listen()
@@ -165,12 +180,21 @@ def main():
 					return None
 				else:
 					obj.change_layer(randint(-3, 3))
+					if obj == coin:
+						obj.t.sety(randint(-3, 3)*100)
+					else:
+						obj.t.color(choice(colors))
 					obj.t.goto(440, obj.y)
 
 		# Not letting people escape up
 		if pl.t.ycor() > 180:
 			speedDict[pl][1] = -30
 			pl.t.sety(pl.t.ycor() - 5)
+
+		#Scoring points with the coin
+		if coin.collided(pl):
+			score += 4
+			coin.t.setx(600)
 
 		# The player staying on top of objects
 		for obj in speedDict:
@@ -191,6 +215,10 @@ def main():
 		# This brings up the 'death' animation
 		if pl.t.ycor() < -260:
 			return None;
+
+		# Score checking
+		if score > highscore:
+			highscore = score
 
 		# Delays
 		sp *= (1 + speedUpRate/framerate)
