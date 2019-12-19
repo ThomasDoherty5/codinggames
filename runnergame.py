@@ -129,12 +129,15 @@ def jump():
 def jump_down():
 	pl.down()
 
+dis = 0
+
 # Main game (not counting death)
 def main():
 
 	global sp
 	global jumpTime
 	global highscore
+	global dis; dis = 0
 	sp = speed
 
 	score = 0
@@ -159,7 +162,8 @@ def main():
 		wn.update()
 
 		pen.clear()
-		pen.write("Score: " + str(score) + "     High Score: " + str(highscore), align = 'center', font = ('Times', 20, 'normal'))
+		pen.write("Score: " + str(score) + "     High Score: " + str(highscore) + "     Distance: " + str(int(dis//1)),
+			align = 'center', font = ('Times', 20, 'normal'))
 
 		for obj in speedDict:
 			# Moving everything
@@ -228,6 +232,7 @@ def main():
 
 		# Delays
 		sp *= (1 + speedUpRate/framerate)
+		dis += sp/(framerate*20);
 		elapsed += 1
 		if jumpTime < framerate/2:
 			jumpTime += 1
@@ -236,13 +241,14 @@ def main():
 		sleep(1/framerate)
 
 def death(sc):
+	global dis
 	for obj in speedDict:
 		obj.t.goto(1000, 0)
 
 	wn.update()
 
 	pen.goto(0, 0)
-	pen.write('You died!    Score: ' + str(sc), align = 'center', font = ('Times', 30, 'bold'))
+	pen.write('You died!    Score: ' + str(sc) + '     Distance: ' + str(int(dis//1)), align = 'center', font = ('Times', 30, 'bold'))
 	sleep(2)
 	pen.clear()
 
@@ -267,6 +273,6 @@ _tkinter.TclError: invalid command name ".!canvas"
 try:
 	while True:
 		sc = main()
-		death(sc)
 except:
 	pass;
+	death(sc)
