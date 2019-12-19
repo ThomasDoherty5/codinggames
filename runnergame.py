@@ -246,6 +246,27 @@ def death(sc):
 	sleep(2)
 	pen.clear()
 
-while True:
-	sc = main()
-	death(sc)
+# This is in a try-except clause to get rid of the massive 'error' occurring in earlier versions:
+'''
+Traceback (most recent call last):
+  File "runnergame.py", line 251, in <module>
+    sc = main()
+  File "runnergame.py", line 154, in main
+    pen.clear()
+  File "/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/turtle.py", line 2642, in clear
+    self._clear()
+  File "/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/turtle.py", line 2620, in _clear
+    self.screen._delete(item)
+  File "/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/turtle.py", line 557, in _delete
+    self.cv.delete(item)
+  File "<string>", line 1, in delete
+  File "/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/tkinter/__init__.py", line 2818, in delete
+    self.tk.call((self._w, 'delete') + args)
+_tkinter.TclError: invalid command name ".!canvas"
+'''
+try:
+	while True:
+		sc = main()
+		death(sc)
+except:
+	pass;
