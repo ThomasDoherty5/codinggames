@@ -19,6 +19,9 @@ scoreRate = 5
 speedUpRate = 0.04
 downJump = 80
 jumpTime = 2*framerate
+specialEffectsRarity = 1
+coinScore = 4
+powerTime = 10
 
 highscore = 0
 
@@ -49,6 +52,10 @@ colors = [
 '#00C0FF', '#0040FF', '#0000FF', '#4000FF', '#8000FF', '#C000FF', '#FF00FF',
 '#FF00C0', '#FF0080', '#FF0040'
 ]
+
+abilitiesDict = {
+'iJ':'#802010', 'dC':'#701370'
+}
 
 # For everything on-screen
 class Obj():
@@ -118,12 +125,14 @@ bar.t.shapesize(stretch_wid = 0.5, stretch_len = 50)
 # Player
 pl = Obj('#00FF00', 0, 20, 1, True, 'pl')
 
+coinPower = None
+jumpDelay = True
+
 def jump():
 	global jumpTime
-	if jumpTime >= framerate/2:
+	if jumpTime >= framerate/2 or jumpDelay == False:
 		speedDict[pl] = [speedDict[pl][0], jHeight]
-		jumpTime = 0
-	else:
+	elif jumpDelay == True:
 		pass;
 
 def jump_down():
@@ -138,12 +147,24 @@ def main():
 	global jumpTime
 	global highscore
 	global dis; dis = 0
+	global coinScore
+	powerEligibility = True
+	pTime = 0 #Time since last gotten power
 	sp = speed
 
 	score = 0
 	elapsed = 0
 
 	speedDict[pl] = [0, 0]
+
+	# Power the coin has
+	coinPower = None;
+
+	# Player power
+	playerPower = None
+
+	#Is there a jump delay?
+	jumpDelay = True
 
 	# Starting off the game
 	for obj in speedDict:
@@ -177,6 +198,46 @@ def main():
 					if obj.collided(obj2):
 						obj.t.sety(obj.t.ycor() + choice([-20, 20]))
 
+		#Random special effects generator
+		if powerEligibility:
+			if randint(1, specialEffectsRarity*framerate) == 5:
+				if coinPower is None:
+					p = choice(list(abilitiesDict.keys())); coinPower = p; coin.t.color(abilitiesDict[p])
+
+		#Special effects (runs every loop iteration)
+		#Deleted old code because it was structured badly
+		if coinPower is not None: #Powers on line 55
+			# No more powers for you
+			powerEligibility = False
+
+			if pl.collided(coin):
+				playerPower = coinPower
+				coinPower = None
+				coin.t.color('#FFCC22')
+
+				#Lightening the background slightly
+				wn.bgcolor('#55AADD')
+
+				# Time with power
+				pTime = 0
+
+		# Powers!
+		if playerPower is not None:
+			if playerPower == 'iJ':
+				jumpDelay = False
+			elif playerPower == 'dC' and pTime == 0:
+				coinScore *= 2
+
+			if pTime > framerate*powerTime:
+				wn.bgcolor('#2288CC')
+				coinPower = None
+				playerPower = None
+				powerEligibility = True
+
+				#Ending the powers
+				coinScore *= 1/2
+				jumpDelay = True
+
 		#Jumping
 		wn.listen()
 		wn.onkeypress(jump, 'Up')
@@ -203,8 +264,9 @@ def main():
 
 		#Scoring points with the coin
 		if coin.collided(pl):
-			score += 4
+			score += coinScore
 			coin.t.setx(600)
+			coin.t.sety(choice([-3, -2, -1, 0, 1, 2, 3])*50)
 
 		# The player staying on top of objects
 		for obj in speedDict:
@@ -231,6 +293,7 @@ def main():
 			highscore = score
 
 		# Delays
+		pTime += 1
 		sp *= (1 + speedUpRate/framerate)
 		dis += sp/(framerate*20);
 		elapsed += 1
@@ -241,6 +304,7 @@ def main():
 		sleep(1/framerate)
 
 def death(sc):
+	coinPower = None; playerPower = None; wn.bgcolor('#2288CC')
 	global dis
 	for obj in speedDict:
 		obj.t.goto(1000, 0)
@@ -270,9 +334,16 @@ Traceback (most recent call last):
     self.tk.call((self._w, 'delete') + args)
 _tkinter.TclError: invalid command name ".!canvas"
 '''
-try:
+debugMode = False;
+
+if not debugMode:
+	try:
+		while True:
+			sc = main()
+			death(sc)
+	except:
+		pass;
+else:
 	while True:
 		sc = main()
-except:
-	pass;
-	death(sc)
+		death(sc)
