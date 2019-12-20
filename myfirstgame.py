@@ -141,6 +141,7 @@ while True:
 		os.system("afplay pong_bounce.wav&")
 		drectionx *= -1
 
+	#making the ball faster over time
 	if (drectionx < 0):
 		ball.dx -= 0.001
 	if (drectiony < 0):		
@@ -149,6 +150,8 @@ while True:
 		ball.dx += 0.001
 	if (drectiony > 0):
 		ball.dy += 0.001
+
+	#seeing if the socre of a player is 10 witch means that player wins 
 	if (score_1 > 9):
 		pen.clear
 		pen.goto(0, 10)
