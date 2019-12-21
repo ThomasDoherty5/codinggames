@@ -19,9 +19,7 @@ scoreRate = 5
 speedUpRate = 0.04
 downJump = 80
 jumpTime = 2*framerate
-specialEffectsRarity = 1
 coinScore = 4
-powerTime = 10
 
 highscore = 0
 
@@ -54,7 +52,7 @@ colors = [
 ]
 
 abilitiesDict = {
-'iJ':'#802010', 'dC':'#701370'
+'iJ':'#118824', 'dC':'#701370'
 }
 
 # For everything on-screen
@@ -130,9 +128,11 @@ jumpDelay = True
 
 def jump():
 	global jumpTime
-	if jumpTime >= framerate/2 or jumpDelay == False:
+	if jumpTime >= framerate/2 or not jumpDelay:
 		speedDict[pl] = [speedDict[pl][0], jHeight]
-	elif jumpDelay == True:
+		if jumpDelay:
+			jumpTime = 0
+	elif jumpDelay:
 		pass;
 
 def jump_down():
@@ -148,7 +148,6 @@ def main():
 	global highscore
 	global dis; dis = 0
 	global coinScore
-	powerEligibility = True
 	pTime = 0 #Time since last gotten power
 	sp = speed
 
@@ -156,12 +155,6 @@ def main():
 	elapsed = 0
 
 	speedDict[pl] = [0, 0]
-
-	# Power the coin has
-	coinPower = None;
-
-	# Player power
-	playerPower = None
 
 	#Is there a jump delay?
 	jumpDelay = True
@@ -197,46 +190,6 @@ def main():
 				if obj != obj2 and obj != pl and obj2 != pl:
 					if obj.collided(obj2):
 						obj.t.sety(obj.t.ycor() + choice([-20, 20]))
-
-		#Random special effects generator
-		if powerEligibility:
-			if randint(1, specialEffectsRarity*framerate) == 5:
-				if coinPower is None:
-					p = choice(list(abilitiesDict.keys())); coinPower = p; coin.t.color(abilitiesDict[p])
-
-		#Special effects (runs every loop iteration)
-		#Deleted old code because it was structured badly
-		if coinPower is not None: #Powers on line 55
-			# No more powers for you
-			powerEligibility = False
-
-			if pl.collided(coin):
-				playerPower = coinPower
-				coinPower = None
-				coin.t.color('#FFCC22')
-
-				#Lightening the background slightly
-				wn.bgcolor('#55AADD')
-
-				# Time with power
-				pTime = 0
-
-		# Powers!
-		if playerPower is not None:
-			if playerPower == 'iJ':
-				jumpDelay = False
-			elif playerPower == 'dC' and pTime == 0:
-				coinScore *= 2
-
-			if pTime > framerate*powerTime:
-				wn.bgcolor('#2288CC')
-				coinPower = None
-				playerPower = None
-				powerEligibility = True
-
-				#Ending the powers
-				coinScore *= 1/2
-				jumpDelay = True
 
 		#Jumping
 		wn.listen()
