@@ -20,7 +20,7 @@ int main() {
 	std::cin >> wait;
 	std::cout << "A game by Santiago Mackenzie." << std::endl;
 	std::cin >> wait;
-	std::cout << "With help from Adam Hutchings, Nathan Solomon, Jake, Vand, and more." << std::endl;
+	std::cout << "With help from Adam Hutchings, Nathan Solomon, Jake Roggenbuck, Carter Luck, and more." << std::endl;
 	std::cin >> wait;
 	std::string game_start;
 	while(game_start != "q") {
